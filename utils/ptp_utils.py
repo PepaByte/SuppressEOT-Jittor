@@ -61,49 +61,28 @@ def view_images(images, num_rows=1, offset_ratio=0.02, save_name="null-text+ptp"
     # pil_img.show()
 
 def export_images(images: List[np.ndarray], base_name: str, task_type: str):
-    """
-    将原图和结果图分别导出到指定的 'results' 目录中.
-
-    参数:
-    - images (List[np.ndarray]): 包含两张图片的列表 [original_image, result_image].
-    - base_name (str): 输出文件的基础名 (不含扩展名), 例如 "A dog in Van Gogh Style".
-    - task_type (str): 任务类型, "Generated-Image" 或 "Real-Image".
-    """
     # 1. 确定输出目录
     if task_type == "Generated-Image":
         output_dir = Path("./results/gen")
     elif task_type == "Real-Image":
         output_dir = Path("./results/real")
     else:
-        print(f"警告: 未知的任务类型 '{task_type}'，图片将保存到 ./results/misc")
-        output_dir = Path("./results/misc")
-
-    # 2. 创建目录 (如果不存在)
+        output_dir = Path("./results/others")
+    
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # 3. 检查图片列表是否符合预期
+    
     if not isinstance(images, list) or len(images) < 2:
-        print("警告: export_images 需要一个至少包含两张图片的列表。")
+        print("export_images 需要一个至少包含两张图片的列表。")
         return
-
-    # 4. 分别保存图片
-    try:
-        # 将 numpy 数组转换为 PIL Image 对象
-        original_img = Image.fromarray(images[0].astype(np.uint8))
-        result_img = Image.fromarray(images[1].astype(np.uint8))
-
-        # 定义文件名
-        original_save_path = output_dir / f"{base_name}.jpg"
-        result_save_path = output_dir / f"{base_name}-result.jpg"
-
-        # 保存
-        original_img.save(original_save_path, quality=95)
-        result_img.save(result_save_path, quality=95)
-        
-        # print(f"图片已成功导出至: {output_dir}")
-
-    except Exception as e:
-        print(f"导出图片时发生错误: {e}")
+    
+    original_img = Image.fromarray(images[0].astype(np.uint8))
+    result_img = Image.fromarray(images[1].astype(np.uint8))
+    # 定义文件名
+    original_save_path = output_dir / f"{base_name}.jpg"
+    result_save_path = output_dir / f"{base_name}-result.jpg"
+    # 保存
+    original_img.save(original_save_path, quality=95)
+    result_img.save(result_save_path, quality=95)
 
 def save_image_grid(img, fname, grid_size):
     gw, gh = grid_size
