@@ -275,7 +275,7 @@ python clipscore-main/clipscore.py "grouped_candidates_final_results\candidates_
 </div>
 
 显存使用上，根据```logger```提供的数据，Null-Optimization阶段PyTorch保持在约9GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch保持在约6GB，Jittor保持在约8GB。
-但反常的是，云平台的监测结果显示，Null-Optimization阶段PyTorch保持在约17GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch和Jittor均保持在约9GB。这可能是由于```logger```设计与平台的监测器设计有所不同。
+但反常的是，云平台的监测结果显示，Null-Optimization阶段PyTorch保持在约17GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch和Jittor均保持在约9GB。这可能是由于```logger```与平台的监测器设计有所不同。
 ```logger```使用```pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(1)).used```，只记录了每轮循环```jt.gc()/torch.cuda.empty_cache()```后的结果，没有记录到峰值显存。
 
 ---
@@ -301,3 +301,5 @@ CLIPScore差异在0.01-0.02之间(相对误差不大于3%)，程序在Jittor下�
 1. 一定要逐行记录环境的配置过程！为了复现环境，tokenizers0.13.3的编译依赖rust，但较新版本的rust编译会报错，如果强行忽略错误编译后续会有问题。在本地偶然编译成功了一次，但之后再也没成功过。另外jittor的安装顺序也很重要，它依赖于较低版本的numpy。
 2.  `torch.nn.Module` 和 `jittor.Module` 是互换的；在有时必须要重写函数或类时，一定对齐接口，否则难以使用。
 3. 不同于torch的```Generator```类灵活复杂的管理方式，jittor的随机数生成器```jt.misc.set_global_seed(seed)```是全局统一的。
+4. ```logger```和实验的设计都不够完善，例如应当记录修改caption前后CLIPScore得分是否出现降低，以确保实验的可信度。此外，原实验评估CLIPScore时使用的是原提示词，得分越低越好。倘如使用去除负面目标的提示词，那么无论是“vangogh style”还是“~~vangogh style~~”的图像，都将取得高分，用于判断“成功抑制”这一目标是欠妥的。在实验前就应当仔细关注并思考原论文实验细节。我将尽快修正这一结果。
+5. 疑似是随机数管理器不同或是使用了JDiffusion框架的原因，使用同一随机种子时，程序在Torch和Jittor框架下生成的图像并不一致。
