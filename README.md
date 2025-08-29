@@ -154,7 +154,7 @@ python suppress_eot_w_nulltext0.py
 
 本项目为图像编辑任务，使用预训练的StableDiffusion模型(默认为v1-4)完成图像生成。项目的核心流程是用**空文本优化**将真实图片及其prompt反演为latent，而后进行**软权重正则化(SWR)**和**推理时优化(ITO)**，通过调节caption中特定token的权重来消除或增加图像中的特定元素。项目适用于真实图像和生成图像的编辑任务.
 
-对真实图像，图片会先经DDIM Inversion得到适配的latents，这些latents在空文本优化下逐步被引导至最优初始潜变量$`\{z_{i}^{*}\}_{0}^{T}`$。而后，$`z_{0}^{*}`$和prompt在经UNet2DConditionModel去噪生成图像的50步中，第10-20步会进行推理时优化，第10步-50步会对交叉注意力图中negative token对应的列做软权重处理，最终得到消除negative token的图像。对直接由SD模型生成的图像，则只经历SWR。
+对真实图像，图片会先经DDIM Inversion得到适配的latents，这些latents在空文本优化下逐步被引导至最优初始潜变量$`\{z_{i}^{*}\}_{0}^{T}`$。而后，$`z_{0}^{*}`$和prompt在经UNet2DConditionModel去噪生成图像的50步中，第10-20步会进行推理时优化，第10步-50步会对交叉注意力图中negative token对应的列做软权重处理，最终得到消除negative token的图像。对直接由SD模型生成的图像，则只经历ITO+SWR。
 
 AttentionControl和AttentionStore类是代码的核心组件，支持对注意力图的保存、ITO损失函数的计算等功能。
 
