@@ -145,7 +145,7 @@ pip install -r requirements.txt
 环境配置完成后，可执行测试：
 
 ```python
-python suppress_eot_w_nulltext.py
+python suppress_eot_w_nulltext0.py
 ```
 
 
