@@ -130,7 +130,11 @@ python -m jittor.test.test_cudnn_op
 ```
 pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
 ```
+环境配置完成后，可执行测试：
 
+```python
+python suppress_eot_w_nulltext0.py
+```
 ---
 
 ### PyTorch环境配置
@@ -141,14 +145,6 @@ pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https
 pip install tokenizers-0.13.3-cp312-cp312-linux_x86_64.whl
 pip install -r requirements.txt
 ```
-
-环境配置完成后，可执行测试：
-
-```python
-python suppress_eot_w_nulltext0.py
-```
-
-
 
 ## 模型结构
 
