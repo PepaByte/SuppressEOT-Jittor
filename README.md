@@ -156,7 +156,7 @@ python suppress_eot_w_nulltext0.py
 
 对真实图像，图片会先经DDIM Inversion得到适配的latents，这些latents在空文本优化下逐步被引导至最优初始潜变量$`\{z_{i}^{*}\}_{0}^{T}`$。而后，$`z_{0}^{*}`$和prompt在经UNet2DConditionModel去噪生成图像的50步中，第10-20步会进行推理时优化，第10步-50步会对交叉注意力图中negative token对应的列做软权重处理，最终得到消除negative token的图像。对直接由SD模型生成的图像，则只经历SWR。
 
-AttentionControl和AttentionStore类是代码的核心组件，实现对注意力图的保存、ITO损失函数的计算等功能。
+AttentionControl和AttentionStore类是代码的核心组件，支持对注意力图的保存、ITO损失函数的计算等功能。
 
 ## 实验流程
 
@@ -275,7 +275,7 @@ python clipscore-main/clipscore.py "grouped_candidates_final_results\candidates_
 </div>
 
 显存使用上，根据```logger```提供的数据，Null-Optimization阶段PyTorch保持在约9GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch保持在约6GB，Jittor保持在约8GB。
-但反常的是，云平台的监测结果显示，Null-Optimization阶段PyTorch保持在约17GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch和Jittor均保持在约9GB。这可能是由于```logger```与平台的监测器设计有所不同。
+但反常的是，云平台的监测结果显示，真实图像处理过程，PyTorch峰值保持在约17GB，Jittor峰值保持在约13GB；生成图像处理过程，PyTorch和Jittor峰值均保持在约9GB。这可能是由于```logger```与平台的监测器设计有所不同。
 ```logger```使用```pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(1)).used```，只记录了每轮循环```jt.gc()/torch.cuda.empty_cache()```后的结果，没有记录到峰值显存。
 
 ---
