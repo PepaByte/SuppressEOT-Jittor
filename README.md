@@ -1,7 +1,5 @@
 # SuppressEOT-Jittor
 
-**[English](./README_EN.md) | 简体中文**
-
 ![Project Status](https://img.shields.io/badge/status-completed-brightgreen) ![Python](https://img.shields.io/badge/python-3.12-blue) ![Jittor](https://img.shields.io/badge/jittor-1.3.9.14-red) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ##  项目简介
@@ -87,7 +85,7 @@ conda activate jittor_env
 pip install git+https://github.com/JittorRepos/jittor
 pip install git+https://github.com/JittorRepos/jtorch
 pip install git+https://github.com/JittorRepos/diffusers_jittor
-pip install tokenizers-0.13.3-cp312-cp312-linux_x86_64.whl  # 请先从xxx下载并放置在$HOME目录下
+pip install tokenizers-0.13.3-cp312-cp312-linux_x86_64.whl  # 请先放置在$HOME目录下
 pip install git+https://github.com/JittorRepos/transformers_jittor
 git clone https://github.com/JittorRepos/JDiffusion.git
 cd JDiffusion
@@ -156,7 +154,7 @@ python suppress_eot_w_nulltext.py
 
 本项目为图像编辑任务，使用预训练的StableDiffusion模型(默认为v1-4)完成图像生成。项目的核心流程是用**空文本优化**将真实图片及其prompt反演为latent，而后进行**软权重正则化(SWR)**和**推理时优化(ITO)**，通过调节caption中特定token的权重来消除或增加图像中的特定元素。项目适用于真实图像和生成图像的编辑任务.
 
-对真实图像，图片会先经DDIM Inversion得到适配的latents，这些latents在空文本优化下逐步被引导至最优初始潜变量$\{z_{i}^{*}\}_{0}^{T}$。而后，$z_{0}^{*}$和prompt在经UNet2DConditionModel去噪生成图像的50步中，第10~20步会进行推理时优化，第10步~50步会对交叉注意力图中negative token对应的列做软权重处理，最终得到消除negative token的图像。对直接由SD模型生成的图像，则只经历SWR。
+对真实图像，图片会先经DDIM Inversion得到适配的latents，这些latents在空文本优化下逐步被引导至最优初始潜变量$\{z_{i}^{\*}\}_{0}^{T}$。而后，$z_{0}^{\*}$和prompt在经UNet2DConditionModel去噪生成图像的50步中，第10-20步会进行推理时优化，第10步-50步会对交叉注意力图中negative token对应的列做软权重处理，最终得到消除negative token的图像。对直接由SD模型生成的图像，则只经历SWR。
 
 AttentionControl和AttentionStore类是代码的核心组件，实现对注意力图的保存、ITO损失函数的计算等功能。
 
@@ -174,7 +172,7 @@ AttentionControl和AttentionStore类是代码的核心组件，实现对注意�
 | 指定目标编辑-gen  | COCOval2017_caption(含"car"), 12个提示词                     |
 | 总计              | 64张图片                                                     |
 
-注：需从[COCO官网](http://images.cocodataset.org/zips/val2017.zip)下载val2017.zip并将图片解压到./datasets/real/coco/val2017/xxx.jpg
+注：需从COCO官网下载[图片](http://images.cocodataset.org/zips/val2017.zip)```val2017.zip```并解压到```./datasets/real/coco/val2017/xxx.jpg```，下载[注释](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)```annotations_trainval2017.zip```并解压到```./datasets/real/coco/annotations/xxx.json```
 
 ### 数据抽样
 
@@ -183,8 +181,7 @@ AttentionControl和AttentionStore类是代码的核心组件，实现对注意�
 ```python
 python test/data_processor.py
 ```
-
-而后可执行实验
+您也可按照格式手动添加任务至```./datasets/prompts_tokens.json```，而后可执行实验
 
 ```
 python test/data_loader.py
@@ -217,23 +214,20 @@ python test/data_loader.py
 python clipscore-main/clipscore.py "grouped_candidates_final_results\candidates_real_coco_car_results.json" "results\real_coco"
 ```
 
-即可得到该组图片的CLIPScore。对Jittor生成图片评分，只需在torch环境中执行以上命令。
+即可得到该组图片的CLIPScore。对Jittor生成图片评分，需在torch环境中执行以上命令。
 
 ---
 
 ## 模型对齐与性能对比
 
-由于日志程序开发尚不完善，在批量实验时日志会出现覆盖行为。故仅对4张真实图片的抑制过程进行了数据记录与处理。
+由于日志程序开发尚不完善，在批量实验时日志会出现覆盖行为。故目前仅对4张真实图片的抑制过程进行了数据记录与处理。
 
 ---
 
 ### Loss 曲线对齐情况
 
 <div align="center">
-  <img src="figures/loss_pytorch.png" alt="PyTorch Loss Curve" width="70%"/>
-  <p><i>PyTorch 训练 loss 曲线</i></p>
-
-
+  
   <img src="figures/ito_loss.png" width="70%"/>
 
   <p><i>ITO loss 对比</i></p>
@@ -263,10 +257,26 @@ python clipscore-main/clipscore.py "grouped_candidates_final_results\candidates_
 ### 显存占用对比
 
 <div align="center">
-  <img src="figures/memory.png" width="80%"/>
-  <p><i>显存占用对比</i></p>
+  <img src="figures/memory.png" width="80%">
+  <p><i>显存占用对比(基于logger)</i></p>
 
-显存使用上，Null-Optimization阶段PyTorch保持在约9GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch保持在约6GB，Jittor保持在约8GB。
+  <table style="margin:0 auto;">
+    <tr>
+      <td style="padding:0 10px;">
+        <img src="figures/torch_run.png" width="100%">
+        <p><i>显存占用(Torch，平台监测)</i></p>
+      </td>
+      <td style="padding:0 10px;">
+        <img src="figures/jittor_run.png" width="100%">
+        <p><i>显存占用(Jittor，平台监测)</i></p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+显存使用上，根据```logger```提供的数据，Null-Optimization阶段PyTorch保持在约9GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch保持在约6GB，Jittor保持在约8GB。
+但反常的是，云平台的监测结果显示，Null-Optimization阶段PyTorch保持在约17GB，Jittor保持在约13GB；ITO+SWR阶段，PyTorch和Jittor均保持在约9GB。这可能是由于```logger```设计与平台的监测器设计有所不同。
+```logger```使用```pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(1)).used```，只记录了每轮循环```jt.gc()/torch.cuda.empty_cache()```后的结果，没有记录到峰值显存。
 
 ---
 
@@ -282,9 +292,9 @@ python clipscore-main/clipscore.py "grouped_candidates_final_results\candidates_
 | gen_tyleredlin(10) | 2m43s      | 4m37s       | 0.6985           | 0.6938            |
 | gen_vangogh(20)    | 5m36s      | 9m20s       | 0.6925           | 0.6973            |
 
-CLIPScore差异在0.01-0.02之间(相对误差不大于3%)，程序在Jittor下的运行速度是torch的60%-70%
+CLIPScore差异在0.01-0.02之间(相对误差不大于3%)，程序在Jittor下的运行速度是Torch的60%-70%
 
----
+***
 
 ## 经验教训
 
