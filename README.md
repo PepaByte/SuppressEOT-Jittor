@@ -201,9 +201,9 @@ python test/data_loader.py
 
 ### 测试编辑图像与caption的匹配度（CLIPScore计算）
 
-1. 程序运行完所有任务后，请将```results```文件夹移至./test/,并自行将编辑后的图片正确分类放置在不同的文件夹中。
-
-2. 在./test/下运行```grouping_script.py```，这会为不同类型的图片生成索引```./test/grouped_candidates_final_results/candidates_{image_type}_results.json```
+1. 程序运行完所有任务后，请将```results```文件夹移至./test/，并在该文件夹下运行```grouping_script.py```，这会为不同类型的图片生成索引```./test/grouped_candidates_final_results/candidates_{image_type}_results.json```
+2. 请自行将编辑后的图片(文件名带有```_result```)正确分类放置在不同的文件夹中。
+ 
 3. 请将[ClipScore](https://github.com/jmhessel/clipscore)和[CLIP](https://github.com/openai/CLIP)解压至./test/下，运行CLIP-main下的```setup.py```，然后运行（以下仅为示例）
 
 ```bash
@@ -297,5 +297,5 @@ CLIPScore差异在0.01-0.02之间(相对误差不大于3%)，程序在Jittor下�
 1. 一定要逐行记录环境的配置过程！为了复现环境，tokenizers0.13.3的编译依赖rust，但较新版本的rust编译会报错，如果强行忽略错误编译后续会有问题。在本地偶然编译成功了一次，但之后再也没成功过。另外jittor的安装顺序也很重要，它依赖于较低版本的numpy。
 2.  `torch.nn.Module` 和 `jittor.Module` 是互换的；在有时必须要重写函数或类时，一定对齐接口，否则难以使用。
 3. 不同于torch的```Generator```类灵活复杂的管理方式，jittor的随机数生成器```jt.misc.set_global_seed(seed)```是全局统一的。
-4. ```logger```和实验的设计都不够完善，例如应当记录修改caption前后CLIPScore得分是否出现降低，以确保实验的可信度。此外，原实验评估CLIPScore时使用的是原提示词，得分越低越好。倘如使用去除负面目标的提示词，那么无论是“vangogh style”还是“~~vangogh style~~”的图像，都将取得高分，用于判断“成功抑制”这一目标是欠妥的。在实验前就应当仔细关注并思考原论文实验细节。我将尽快修正这一结果。
+4. ```logger```和实验的设计都不够完善，例如应当记录修改caption前后CLIPScore得分是否出现降低，以确保实验的可信度。此外，原实验评估CLIPScore时使用的是原提示词，得分越低越好。倘如使用去除负面目标的提示词，那么无论是“vangogh style”还是“~~vangogh style~~”的图像，都将取得高分，用于判断“成功抑制”这一目标是欠妥的。在实验前就应当仔细关注并思考原论文实验细节。我将尽快修正这一结果，并完善日志程序。
 5. 疑似是随机数管理器不同或是使用了JDiffusion框架的原因，使用同一随机种子时，程序在Torch和Jittor框架下生成的图像并不一致。
