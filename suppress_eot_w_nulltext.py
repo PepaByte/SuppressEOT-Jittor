@@ -292,10 +292,10 @@ def text2image_ldm_stable(
             # update controller.text_embeddings_erase for some timestep
             iter = controller.iter_each_step
             #ito日志开始
-            logger_step_iot = 0
+            logger_step_ito = 0
             while iter > 0:
                 with jt.enable_grad():
-                    tic_iot = time.perf_counter() # ito计时开始
+                    tic_ito = time.perf_counter() # ito计时开始
                     controller.cur_att_layer = 32  # w=1, skip unconditional branch
                     controller.attention_store = {}
                     # conditional branch
@@ -317,22 +317,24 @@ def text2image_ldm_stable(
                     jt.gc() # torch.cuda.empty_cache()
                     controller.text_embeddings_erase = text_embeddings_erase.clone().detach()
                     controller.text_embeddings_erase.requires_grad = False
-                    toc_iot = time.perf_counter()  # ito计时结束
+                    toc_ito = time.perf_counter()  # ito计时结束
                 iter -= 1
-                logger_step_iot += 1  # ito_step循环
+                logger_step_ito += 1  # ito_step循环
                 #在循环结束后记录日志
-                dt_iot = toc_iot - tic_iot 
+                dt_ito = toc_ito - tic_ito
                 gpu_memory = gpu_mem_mb=pynvml.nvmlDeviceGetMemoryInfo(
                         pynvml.nvmlDeviceGetHandleByIndex(1)
                     ).used / 1024 ** 2   # 在清理缓存后记录显存占用
+                '''
                 sub_losses = {
                     "retain_loss": attn_loss_func.retain_loss_val,
                     "erase_loss": attn_loss_func.erase_loss_val,
                     "self_retain_loss": attn_loss_func.self_retain_loss_val,
                     "self_erase_loss": attn_loss_func.self_erase_loss_val
                 }
-                logger.log_iot(logger_step_iot - 1, sub_losses=sub_losses, total_loss=loss.numpy().item(), timestamp=dt_iot)
-                logger.log_gpu(logger_step_iot - 1, gpu_memory)
+                '''
+                logger.log_ito(logger_step_ito - 1, total_loss=loss.numpy().item(), timestamp=dt_ito)
+                logger.log_gpu(logger_step_ito - 1, gpu_memory)
                 #ito日志结束
         # "uncond_embeddings_ is None" for real images, "uncond_embeddings_ is not None" for generated images.
         context_erase = (uncond_embeddings[i].expand(*text_embeddings.shape), controller.text_embeddings_erase) \
