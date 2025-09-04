@@ -76,15 +76,12 @@ class CSVLogger:
         """Logs GPU memory usage."""
         data = {"step": step, "gpu_MB": gpu_mem_mb}
         self._queue.put(("memory", data))
-
-    def log_iot(self, step: int, sub_losses: Dict[str, float], total_loss: float, timestamp: Optional[float] = None):
-        """Logs IOT (Input/Output/Training) related losses."""
-        # Flatten the dictionary for CSV columns
-        scalars = {f"loss_{k}": v for k, v in sub_losses.items()}
-        scalars["total_loss"] = total_loss
-        scalars["step"] = step
-        scalars["time"] = timestamp
-        self._queue.put(("iot", scalars))
+        
+    def log_ito(self, step: int, total_loss: float, timestamp: Optional[float] = None):
+        """Logs ITO total loss and time per step."""
+        data = {"step": step, "total_loss": total_loss, "time": timestamp}
+        self._queue.put(("ito", data))          # tag 也同步改成 "ito"
+    # --------------  Public API  --------------
 
     # ------------- Internal Implementation -------------
     def _worker_loop(self):
@@ -97,7 +94,7 @@ class CSVLogger:
 
                 # If this tag is new, create a new CSV file and writer
                 if tag not in self._csv_writers:
-                    filepath = os.path.join(self.log_dir, f"{tag}.csv")
+                    filepath = os.path.join(self.log_dir, f"{self.run_name}_{tag}.csv")
                     # Use 'w' mode to create/truncate the file, newline='' is crucial for csv
                     file_handle = open(filepath, 'w', newline='', encoding='utf-8')
                     self._file_handlers[tag] = file_handle
